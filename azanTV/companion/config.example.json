@@ -1,0 +1,37 @@
+{
+  "latitude": 52.52,
+  "longitude": 13.405,
+  "timezone": "Europe/Berlin",
+  "calculationMethod": "MuslimWorldLeague",
+  "madhab": "Shafi",
+  "enabledPrayers": {
+    "fajr": true,
+    "dhuhr": true,
+    "asr": true,
+    "maghrib": true,
+    "isha": true
+  },
+  "offsets": {
+    "fajr": 0,
+    "dhuhr": 0,
+    "asr": 0,
+    "maghrib": 0,
+    "isha": 0
+  },
+  "tv": {
+    "ip": "192.168.1.100",
+    "mac": "AA:BB:CC:DD:EE:FF",
+    "appId": "com.private.azantv",
+    "restPort": 8001,
+    "token": ""
+  },
+  "schedule": {
+    "wolSecondsBefore": 60,
+    "launchSecondsBefore": 30,
+    "enableLaunch": false
+  },
+  "http": {
+    "port": 8787,
+    "host": "0.0.0.0"
+  }
+}

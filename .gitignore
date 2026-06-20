@@ -1,3 +1,8 @@
-companion/node_modules/
 node_modules/
 companion/node_modules/
+companion/config.json
+.DS_Store
+*.wgt
+*.wgt.sha256
+build/
+dist/
