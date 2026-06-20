@@ -1,3 +1,5 @@
+/*global adhan, StorageService */
+/* exported PrayerTimeService */
 var PrayerTimeService = (function () {
     'use strict';
 
@@ -28,10 +30,24 @@ var PrayerTimeService = (function () {
         return adhan.CalculationMethod.MuslimWorldLeague;
     }
 
+    function applyHighLatitudeRule(params, settings) {
+        if (!adhan.HighLatitudeRule) {
+            return;
+        }
+        if (settings.highLatitudeRule && adhan.HighLatitudeRule[settings.highLatitudeRule]) {
+            params.highLatitudeRule = adhan.HighLatitudeRule[settings.highLatitudeRule];
+            return;
+        }
+        if (Math.abs(settings.latitude) >= 48) {
+            params.highLatitudeRule = adhan.HighLatitudeRule.SeventhOfTheNight;
+        }
+    }
+
     function buildParams(settings) {
         var factory = getMethodFactory(settings.calculationMethod);
         var params = factory ? factory() : new adhan.CalculationParameters('Other');
         params.madhab = settings.madhab === 'Hanafi' ? adhan.Madhab.Hanafi : adhan.Madhab.Shafi;
+        applyHighLatitudeRule(params, settings);
         params.adjustments = {
             fajr: settings.offsets.fajr || 0,
             sunrise: 0,
@@ -58,10 +74,23 @@ var PrayerTimeService = (function () {
         return result;
     }
 
-    function formatTime(date) {
+    function formatTime(date, timeZone) {
+        if (timeZone && typeof Intl !== 'undefined') {
+            return new Intl.DateTimeFormat('de-DE', {
+                timeZone: timeZone,
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            }).format(date);
+        }
         var h = date.getHours();
         var m = date.getMinutes();
         return pad(h) + ':' + pad(m);
+    }
+
+    function getPrayerTime(settings, prayerKey, date) {
+        var times = calculateForDate(settings, date || new Date());
+        return times[prayerKey];
     }
 
     function pad(n) {
@@ -72,7 +101,7 @@ var PrayerTimeService = (function () {
         return calculateForDate(settings, new Date());
     }
 
-    function recalculateIfNewDay(settings) {
+    function recalculateIfNewDay() {
         var today = StorageService.dayKey(new Date());
         var last = StorageService.getLastCalcDay();
         if (last !== today) {
@@ -169,6 +198,7 @@ var PrayerTimeService = (function () {
         getTodayTimes: getTodayTimes,
         getNextPrayer: getNextPrayer,
         formatTime: formatTime,
+        getPrayerTime: getPrayerTime,
         recalculateIfNewDay: recalculateIfNewDay,
         getCountdownText: getCountdownText,
         fetchOnlineTimes: fetchOnlineTimes

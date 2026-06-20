@@ -56,10 +56,25 @@ function getMethod(methodName) {
   return methods.MuslimWorldLeague();
 }
 
+function applyHighLatitudeRule(params, cfg) {
+  const lib = loadAdhan();
+  if (!lib.HighLatitudeRule) {
+    return;
+  }
+  if (cfg.highLatitudeRule && lib.HighLatitudeRule[cfg.highLatitudeRule]) {
+    params.highLatitudeRule = lib.HighLatitudeRule[cfg.highLatitudeRule];
+    return;
+  }
+  if (Math.abs(cfg.latitude) >= 48) {
+    params.highLatitudeRule = lib.HighLatitudeRule.SeventhOfTheNight;
+  }
+}
+
 function buildParams(cfg) {
   const lib = loadAdhan();
   const params = getMethod(cfg.calculationMethod);
   params.madhab = cfg.madhab === 'Hanafi' ? lib.Madhab.Hanafi : lib.Madhab.Shafi;
+  applyHighLatitudeRule(params, cfg);
   params.adjustments = {
     fajr: (cfg.offsets && cfg.offsets.fajr) || 0,
     sunrise: 0,
@@ -247,7 +262,7 @@ function startHttpServer(cfg) {
   });
 }
 
-function scheduleDailyReplan(cfg) {
+function scheduleDailyReplan() {
   cron.schedule('0 0 * * *', function () {
     config = loadConfig();
     planDay(config);
@@ -273,7 +288,7 @@ function main() {
   }
 
   planDay(config);
-  scheduleDailyReplan(config);
+  scheduleDailyReplan();
   startHttpServer(config);
 
   console.log('AzanTV Companion running');

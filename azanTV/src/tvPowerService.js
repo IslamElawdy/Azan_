@@ -1,3 +1,5 @@
+/*global tizen, webapis, document */
+/* exported TvPowerService */
 var TvPowerService = (function () {
     'use strict';
 

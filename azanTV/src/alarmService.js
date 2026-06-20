@@ -1,7 +1,9 @@
+/*global StorageService, PrayerTimeService, tizen */
+/* exported AlarmService */
 var AlarmService = (function () {
     'use strict';
 
-    var APP_ID = 'com.private.azantv';
+    var APP_ID = 'GfnCKw2I8W.AzanTV';
     var OPERATION = 'http://tizen.org/appcontrol/operation/azan/pray';
 
     function isAvailable() {
@@ -173,8 +175,9 @@ var AlarmService = (function () {
             return 'Kein Alarm geplant';
         }
         var when = new Date(state.nextTime);
+        var tz = StorageService.getSettings().timezone || 'Europe/Berlin';
         return 'Geplant: ' + PrayerTimeService.PRAYER_LABELS[state.nextPrayer] +
-            ' um ' + PrayerTimeService.formatTime(when) +
+            ' um ' + PrayerTimeService.formatTime(when, tz) +
             ' (ID: ' + (state.scheduledAlarmId || '—') + ')';
     }
 

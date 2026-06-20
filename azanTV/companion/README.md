@@ -30,7 +30,7 @@ Find the TV MAC address: **Settings → Support → About This TV → Wired MAC 
 |-------|-------------|
 | `tv.ip` | TV IP address on LAN |
 | `tv.mac` | Wired MAC for WoL |
-| `tv.appId` | Must match `config.xml` (`com.private.azantv`) |
+| `tv.appId` | Must match `config.xml` (`GfnCKw2I8W.AzanTV`) |
 | `schedule.wolSecondsBefore` | Send WoL this many seconds before prayer (default 60) |
 | `schedule.launchSecondsBefore` | Optional REST launch offset (default 30) |
 | `schedule.enableLaunch` | Enable Samsung REST app launch (requires TV pairing/token) |

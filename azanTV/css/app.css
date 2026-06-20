@@ -45,11 +45,22 @@ html, body {
     display: none;
     flex: 1;
     flex-direction: column;
-    gap: 24px;
 }
 
 .screen-active {
     display: flex;
+}
+
+.screen > .panel,
+.screen > .main-nav,
+.screen > .settings-nav,
+.screen > .settings-grid,
+.screen > .screen-title {
+    margin-top: 24px;
+}
+
+.screen > :first-child {
+    margin-top: 0;
 }
 
 .screen-title {
@@ -89,16 +100,22 @@ html, body {
 
 .prayer-list {
     list-style: none;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 16px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
 }
 
 .prayer-list li {
+    flex: 1;
     background: #0f172a;
     border-radius: 12px;
     padding: 16px;
     text-align: center;
+    margin-left: 16px;
+}
+
+.prayer-list li:first-child {
+    margin-left: 0;
 }
 
 .prayer-list .name {
@@ -124,7 +141,7 @@ html, body {
 
 .main-nav, .settings-nav {
     display: flex;
-    gap: 24px;
+    flex-direction: row;
     margin-top: auto;
     padding-top: 24px;
 }
@@ -139,6 +156,10 @@ html, body {
     cursor: pointer;
 }
 
+.nav-btn + .nav-btn {
+    margin-left: 24px;
+}
+
 .nav-btn.focused,
 .focusable.focused {
     outline: 4px solid #38bdf8;
@@ -147,9 +168,9 @@ html, body {
 }
 
 .settings-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px 32px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
     overflow-y: auto;
     max-height: 680px;
     padding-right: 16px;
@@ -158,8 +179,18 @@ html, body {
 .setting-row {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    width: 48%;
+    margin-right: 4%;
+    margin-bottom: 16px;
     font-size: 24px;
+}
+
+.setting-row:nth-child(2n) {
+    margin-right: 0;
+}
+
+.setting-row > span {
+    margin-bottom: 8px;
 }
 
 .setting-input {
@@ -172,11 +203,12 @@ html, body {
 }
 
 .setting-fieldset {
-    grid-column: 1 / -1;
+    width: 100%;
     border: 1px solid #334155;
     border-radius: 12px;
     padding: 16px 24px;
     font-size: 24px;
+    margin-bottom: 16px;
 }
 
 .setting-fieldset legend {
@@ -184,12 +216,38 @@ html, body {
     color: #94a3b8;
 }
 
+.audio-hint {
+    border-color: #f59e0b;
+    background: #1c1917;
+}
+
+.audio-hint-text,
+.audio-hint-files {
+    font-size: 22px;
+    line-height: 1.45;
+    color: #fcd34d;
+    margin: 8px 0;
+}
+
+.audio-hint-files {
+    color: #cbd5e1;
+    font-size: 20px;
+}
+
+.audio-hint code {
+    color: #38bdf8;
+}
+
 .toggle-row, .offset-row {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
     margin: 8px 24px 8px 0;
     font-size: 26px;
+}
+
+.toggle-row input,
+.offset-row input {
+    margin-left: 12px;
 }
 
 .offset-input {

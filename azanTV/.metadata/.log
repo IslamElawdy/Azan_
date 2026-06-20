@@ -1,0 +1,46 @@
+!SESSION 2026-06-20 23:18:35.327 -----------------------------------------------
+eclipse.buildId=10.0 
+java.version=1.8.0_242
+java.vendor=Amazon.com Inc.
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+This is a continuation of log file C:\Users\iisla\Documents\Azan_\azanTV\.metadata\.bak_0.log
+Created Time: 2026-06-20 23:18:53.860
+
+!ENTRY org.eclipse.ui 2 0 2026-06-20 23:18:53.861
+!MESSAGE Warnings while parsing the images from the 'org.eclipse.ui.commandImages' extension point.
+!SUBENTRY 1 org.eclipse.ui 2 0 2026-06-20 23:18:53.861
+!MESSAGE Cannot bind to an undefined command: plug-in='org.eclipse.egit.ui', id='org.eclipse.egit.ui.RepositoriesViewRefresh'
+!SUBENTRY 1 org.eclipse.ui 2 0 2026-06-20 23:18:53.861
+!MESSAGE Cannot bind to an undefined command: plug-in='org.eclipse.egit.ui', id='org.eclipse.egit.ui.org.eclipse.egit.ui.AbortRebase'
+!SUBENTRY 1 org.eclipse.ui 2 0 2026-06-20 23:18:53.861
+!MESSAGE Cannot bind to an undefined command: plug-in='org.eclipse.egit.ui', id='org.eclipse.egit.ui.history.RenameBranch'
+
+!ENTRY org.eclipse.egit.ui 2 0 2026-06-20 23:18:59.737
+!MESSAGE Warning: The environment variable HOME is not set. The following directory will be used to store the Git
+user global configuration and to define the default location to store repositories: 'C:\Users\iisla'. If this is
+not correct please set the HOME environment variable and restart Eclipse. Otherwise Git for Windows and
+EGit might behave differently since they see different configuration options.
+This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.
+
+!ENTRY org.eclipse.launchbar.core 2 0 2026-06-21 00:43:12.336
+!MESSAGE Enablement expression is missing for descriptor type org.eclipse.cdt.debug.core.coreBuildDescriptorType
+
+!ENTRY org.eclipse.launchbar.core 2 0 2026-06-21 00:43:12.337
+!MESSAGE Enablement expression is missing for config provider for org.eclipse.cdt.debug.core.coreBuildDescriptorType
+
+!ENTRY org.tizen.web.zimlaunch 4 0 2026-06-21 00:43:17.504
+!MESSAGE Installing the package... > Fail
+!STACK 0
+org.tizen.web.zimlaunch.exception.TizenWebIDEException: Unexpected error occurred at the below step.
+ `Installing the package...`
+Tizen Web Application install failed. Please try again later.
+	at org.tizen.web.zimlaunch.step.InstallStep.executeStep(InstallStep.java:189)
+	at org.tizen.web.zimlaunch.core.CompositeStep.executeStep(CompositeStep.java:109)
+	at org.tizen.web.zimlaunch.deployer.ZimLaunchDelegate.launch(ZimLaunchDelegate.java:322)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:885)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:739)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin.buildAndLaunch(DebugUIPlugin.java:1039)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin$8.run(DebugUIPlugin.java:1256)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:56)

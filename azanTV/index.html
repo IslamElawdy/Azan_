@@ -82,9 +82,16 @@
                         <option value="Hanafi">Hanafi</option>
                     </select>
                 </label>
+                <fieldset class="setting-fieldset audio-hint">
+                    <legend>Azan-Audio</legend>
+                    <p class="audio-hint-text">MP3-Dateien müssen im Tizen-Projekt unter <code>azanTV/assets/azan/</code> liegen. Nach dem Hinzufügen neuer Dateien: <strong>neu bauen</strong> und auf den TV installieren.</p>
+                    <p class="audio-hint-files">Verfügbar: <code>Abdul-Basit.mp3</code>, <code>Adhan-Egypt.mp3</code>, <code>makkah.mp3</code>, <code>madinah.mp3</code>, <code>fajr.mp3</code></p>
+                </fieldset>
                 <label class="setting-row focusable" tabindex="0">
                     <span>Azan-Audio</span>
                     <select id="setting-audio" class="setting-input">
+                        <option value="abdulbasit">Abdul Basit</option>
+                        <option value="egypt">Adhan Egypt</option>
                         <option value="makkah">Makkah</option>
                         <option value="madinah">Madinah</option>
                     </select>
@@ -93,7 +100,11 @@
                     <span>Fajr-Audio</span>
                     <select id="setting-fajr-audio" class="setting-input">
                         <option value="same">Wie Standard</option>
-                        <option value="fajr">Separates Fajr-Audio</option>
+                        <option value="fajr">Fajr (fajr.mp3)</option>
+                        <option value="abdulbasit">Abdul Basit</option>
+                        <option value="egypt">Adhan Egypt</option>
+                        <option value="makkah">Makkah</option>
+                        <option value="madinah">Madinah</option>
                     </select>
                 </label>
                 <label class="setting-row focusable" tabindex="0">

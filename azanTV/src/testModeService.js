@@ -1,3 +1,5 @@
+/*global AlarmService, AudioService, TvPowerService */
+/* exported TestModeService */
 var TestModeService = (function () {
     'use strict';
 

@@ -1,3 +1,5 @@
+/*global PrayerTimeService, AlarmService, document */
+/* exported MainScreen */
 var MainScreen = (function () {
     'use strict';
 
@@ -21,13 +23,14 @@ var MainScreen = (function () {
 
     function render(settings) {
         var now = new Date();
-        elements.currentTime.textContent = formatClock(now);
+        var tz = settings.timezone || 'Europe/Berlin';
+        elements.currentTime.textContent = formatClock(now, tz);
 
         var today = PrayerTimeService.getTodayTimes(settings);
         var next = PrayerTimeService.getNextPrayer(settings, now);
 
         if (next) {
-            elements.nextPrayer.textContent = next.label + ' – ' + PrayerTimeService.formatTime(next.time);
+            elements.nextPrayer.textContent = next.label + ' – ' + PrayerTimeService.formatTime(next.time, tz);
             elements.countdown.textContent = 'Countdown: ' + PrayerTimeService.getCountdownText(next.time, now);
         } else {
             elements.nextPrayer.textContent = '—';
@@ -48,7 +51,7 @@ var MainScreen = (function () {
             name.textContent = PrayerTimeService.PRAYER_LABELS[key];
             var time = document.createElement('span');
             time.className = 'time';
-            time.textContent = PrayerTimeService.formatTime(today[key]);
+            time.textContent = PrayerTimeService.formatTime(today[key], tz);
             li.appendChild(name);
             li.appendChild(time);
             elements.prayerList.appendChild(li);
@@ -57,8 +60,17 @@ var MainScreen = (function () {
         elements.alarmStatus.textContent = AlarmService.getStatusText();
     }
 
-    function formatClock(date) {
-        return PrayerTimeService.formatTime(date) + ':' + pad(date.getSeconds());
+    function formatClock(date, timeZone) {
+        if (timeZone && typeof Intl !== 'undefined') {
+            return new Intl.DateTimeFormat('de-DE', {
+                timeZone: timeZone,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            }).format(date);
+        }
+        return PrayerTimeService.formatTime(date, timeZone) + ':' + pad(date.getSeconds());
     }
 
     function pad(n) {

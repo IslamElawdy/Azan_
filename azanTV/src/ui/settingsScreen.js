@@ -1,3 +1,5 @@
+/*global StorageService, PrayerTimeService, document */
+/* exported SettingsScreen */
 var SettingsScreen = (function () {
     'use strict';
 

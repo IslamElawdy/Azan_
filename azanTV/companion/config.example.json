@@ -2,7 +2,7 @@
   "latitude": 52.52,
   "longitude": 13.405,
   "timezone": "Europe/Berlin",
-  "calculationMethod": "MuslimWorldLeague",
+  "calculationMethod": "Turkey",
   "madhab": "Shafi",
   "enabledPrayers": {
     "fajr": true,
@@ -12,16 +12,16 @@
     "isha": true
   },
   "offsets": {
-    "fajr": 0,
-    "dhuhr": 0,
-    "asr": 0,
-    "maghrib": 0,
-    "isha": 0
+    "fajr": -22,
+    "dhuhr": 2,
+    "asr": -2,
+    "maghrib": -8,
+    "isha": 16
   },
   "tv": {
     "ip": "192.168.1.100",
     "mac": "AA:BB:CC:DD:EE:FF",
-    "appId": "com.private.azantv",
+    "appId": "GfnCKw2I8W.AzanTV",
     "restPort": 8001,
     "token": ""
   },

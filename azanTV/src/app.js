@@ -1,3 +1,5 @@
+/*global StorageService, PrayerTimeService, AlarmService, AudioService, TvPowerService, TestModeService, MainScreen, SettingsScreen, PrayerScreen, document */
+/* exported AzanApp */
 var AzanApp = (function () {
     'use strict';
 
@@ -9,7 +11,7 @@ var AzanApp = (function () {
 
     function init() {
         settings = StorageService.getSettings();
-        PrayerTimeService.recalculateIfNewDay(settings);
+        PrayerTimeService.recalculateIfNewDay();
 
         MainScreen.init();
         SettingsScreen.init();
@@ -40,7 +42,7 @@ var AzanApp = (function () {
         });
         if (next) {
             MainScreen.setHeaderStatus(
-                'Nächster Alarm: ' + next.label + ' um ' + PrayerTimeService.formatTime(next.time)
+                'Nächster Alarm: ' + next.label + ' um ' + PrayerTimeService.formatTime(next.time, settings.timezone)
             );
         } else {
             MainScreen.setHeaderStatus('Bereit');
@@ -49,7 +51,7 @@ var AzanApp = (function () {
 
     function handlePrayerEvent(prayerKey) {
         MainScreen.stopTick();
-        PrayerScreen.show(prayerKey);
+        PrayerScreen.show(prayerKey, settings);
         TvPowerService.disableScreenSaver();
 
         AudioService.playAzan(prayerKey, settings).then(function () {
@@ -102,7 +104,7 @@ var AzanApp = (function () {
     function saveSettings() {
         settings = SettingsScreen.read();
         StorageService.saveSettings(settings);
-        PrayerTimeService.recalculateIfNewDay(settings);
+        PrayerTimeService.recalculateIfNewDay();
         var next = AlarmService.scheduleNextPrayer(settings);
         if (next) {
             MainScreen.setHeaderStatus('Einstellungen gespeichert – ' + next.label + ' geplant');
@@ -114,7 +116,7 @@ var AzanApp = (function () {
 
     function testAzanNow() {
         MainScreen.stopTick();
-        PrayerScreen.show('dhuhr');
+        PrayerScreen.show('dhuhr', settings);
         TestModeService.playImmediateTest(settings, {
             onComplete: function () {
                 PrayerScreen.setStatus('Test abgeschlossen');
