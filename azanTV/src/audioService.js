@@ -257,7 +257,8 @@ var AudioService = (function () {
 
     function playAzan(prayerKey, settings) {
         var variant = getAudioVariantForPrayer(settings, prayerKey);
-        var relativePath = 'assets/azan/' + variant + '.mp3';
+        var fileName = getAudioFileName(variant);
+        var relativePath = 'assets/azan/' + fileName;
         var volume = settings.volume !== null && settings.volume !== undefined ? settings.volume : 80;
 
         return new Promise(function (resolve, reject) {

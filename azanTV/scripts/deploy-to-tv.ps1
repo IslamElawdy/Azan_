@@ -76,13 +76,19 @@ function Invoke-TizenPackage {
     Push-Location $Dir
     try {
         Write-Step "Paket signieren mit Profil '$CertProfile'"
-        & $TizenCli package -t wgt -s $CertProfile -- . | Write-Host
+        foreach ($name in @(".metadata", "companion", "docs", "scripts", "README.md", ".gitignore")) {
+            $p = Join-Path $Dir ".buildResult\$name"
+            if (Test-Path $p) { Remove-Item $p -Recurse -Force }
+        }
+        & $TizenCli package -t wgt -s $CertProfile -- .buildResult | Write-Host
         if ($LASTEXITCODE -ne 0) { throw "package fehlgeschlagen (Exit $LASTEXITCODE)" }
-        $wgt = Join-Path $Dir "isAzan.wgt"
-        if (-not (Test-Path $wgt)) { throw "isAzan.wgt wurde nicht erzeugt" }
-        $sizeKb = [math]::Round((Get-Item $wgt).Length / 1KB, 1)
-        Write-Host "WGT: $wgt ($sizeKb KB)" -ForegroundColor Green
-        return $wgt
+        $wgt = Get-ChildItem (Join-Path $Dir ".buildResult") -Filter "*.wgt" | Select-Object -First 1
+        if (-not $wgt) { throw "Keine .wgt in .buildResult erzeugt" }
+        Copy-Item $wgt.FullName (Join-Path $Dir $wgt.Name) -Force
+        $wgtPath = Join-Path $Dir $wgt.Name
+        $sizeKb = [math]::Round((Get-Item $wgtPath).Length / 1KB, 1)
+        Write-Host "WGT: $wgtPath ($sizeKb KB)" -ForegroundColor Green
+        return $wgtPath
     }
     finally {
         Pop-Location
@@ -94,7 +100,7 @@ if (-not (Test-Path $TizenCli)) {
 }
 
 $buildDir = $ProjectDir
-$wgtPath = Join-Path $ProjectDir "isAzan.wgt"
+$wgtPath = Join-Path $ProjectDir "AzanTV.wgt"
 
 function Test-BuildDirLocked {
     param([string]$Dir)
@@ -159,5 +165,5 @@ if (-not $SkipRun) {
 }
 
 Write-Host ''
-Write-Host 'isAzan ist auf dem Fernseher installiert.' -ForegroundColor Green
+Write-Host 'AzanTV ist auf dem Fernseher installiert.' -ForegroundColor Green
 Write-Host 'App in Smart Hub unter Meine Apps suchen (nicht im oeffentlichen Store).'

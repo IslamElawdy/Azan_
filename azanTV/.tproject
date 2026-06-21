@@ -8,5 +8,18 @@
     <package>
         <blacklist>.buildResult</blacklist>
         <blacklist>.metadata</blacklist>
+        <blacklist>.settings</blacklist>
+        <blacklist>.project</blacklist>
+        <blacklist>.tproject</blacklist>
+        <blacklist>.classpath</blacklist>
+        <blacklist>.gitignore</blacklist>
+        <blacklist>README.md</blacklist>
+        <blacklist>companion</blacklist>
+        <blacklist>docs</blacklist>
+        <blacklist>scripts</blacklist>
+        <blacklist>*.wgt</blacklist>
+        <blacklist>author-signature.xml</blacklist>
+        <blacklist>signature1.xml</blacklist>
+        <blacklist>.manifest.tmp</blacklist>
     </package>
 </tproject>

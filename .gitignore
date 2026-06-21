@@ -4,6 +4,12 @@ companion/config.json
 .DS_Store
 *.wgt
 *.wgt.sha256
+build/
+dist/
 azanTV-deploy*/
+azanTV/_tempDecompress/
 azanTV/.buildResult/
 azanTV/.metadata/
+azanTV/signature1.xml
+azanTV/author-signature.xml
+azanTV/.manifest.tmp
