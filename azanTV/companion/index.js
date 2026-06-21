@@ -8,6 +8,9 @@ const cron = require('node-cron');
 const wol = require('wake_on_lan');
 
 const CONFIG_PATH = process.env.AZANTV_CONFIG || path.join(__dirname, 'config.json');
+const SETTINGS_PATH = path.join(__dirname, 'app-settings.json');
+const SETTINGS_EXAMPLE = path.join(__dirname, 'app-settings.example.json');
+const MOBILE_HTML = path.join(__dirname, 'public', 'mobile.html');
 const ADHAN_BUNDLE = path.join(__dirname, '..', 'src', 'vendor', 'adhan.min.js');
 const PRAYER_KEYS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 const PRAYER_LABELS = {
@@ -45,6 +48,57 @@ function loadConfig() {
     process.exit(1);
   }
   return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+}
+
+function loadAppSettings() {
+  if (!fs.existsSync(SETTINGS_PATH)) {
+    if (fs.existsSync(SETTINGS_EXAMPLE)) {
+      fs.copyFileSync(SETTINGS_EXAMPLE, SETTINGS_PATH);
+    } else {
+      return {
+        settingsVersion: 1,
+        updatedAt: new Date().toISOString(),
+        latitude: 52.52,
+        longitude: 13.405,
+        timezone: 'Europe/Berlin',
+        calculationMethod: 'Turkey',
+        madhab: 'Shafi',
+        enabledPrayers: { fajr: true, dhuhr: true, asr: true, maghrib: true, isha: true },
+        offsets: { fajr: -22, dhuhr: 2, asr: -2, maghrib: -8, isha: 16 }
+      };
+    }
+  }
+  return JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8'));
+}
+
+function saveAppSettings(patch) {
+  const current = loadAppSettings();
+  const next = Object.assign({}, current, patch, {
+    settingsVersion: (current.settingsVersion || 0) + 1,
+    updatedAt: new Date().toISOString()
+  });
+  fs.writeFileSync(SETTINGS_PATH, JSON.stringify(next, null, 2), 'utf8');
+  return next;
+}
+
+function getPrayerConfig() {
+  const app = loadAppSettings();
+  return Object.assign({}, config, app);
+}
+
+function readRequestBody(req) {
+  return new Promise(function (resolve, reject) {
+    var chunks = [];
+    req.on('data', function (chunk) { chunks.push(chunk); });
+    req.on('end', function () {
+      try {
+        resolve(JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}'));
+      } catch (e) {
+        reject(e);
+      }
+    });
+    req.on('error', reject);
+  });
 }
 
 function getMethod(methodName) {
@@ -183,7 +237,8 @@ function clearJobs() {
 
 function planDay(cfg) {
   clearJobs();
-  const events = getEnabledPrayerEvents(cfg);
+  const prayerCfg = getPrayerConfig();
+  const events = getEnabledPrayerEvents(prayerCfg);
   const planned = [];
 
   events.forEach(function (event) {
@@ -210,7 +265,7 @@ function logEvent(message) {
   const entry = { at: new Date().toISOString(), message: message };
   lastStatus.events.unshift(entry);
   lastStatus.events = lastStatus.events.slice(0, 50);
-  console.log('[AzanTV Companion]', message);
+  console.log('[isAzan Companion]', message);
 }
 
 function startHttpServer(cfg) {
@@ -218,19 +273,50 @@ function startHttpServer(cfg) {
   const host = (cfg.http && cfg.http.host) || '0.0.0.0';
 
   const server = http.createServer(function (req, res) {
+    const url = req.url.split('?')[0];
+
+    if (req.method === 'GET' && url === '/mobile') {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.end(fs.readFileSync(MOBILE_HTML, 'utf8'));
+      return;
+    }
+
+    if (req.method === 'GET' && url === '/api/settings') {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.end(JSON.stringify(loadAppSettings(), null, 2));
+      return;
+    }
+
+    if (req.method === 'PUT' && url === '/api/settings') {
+      readRequestBody(req).then(function (body) {
+        const saved = saveAppSettings(body);
+        planDay(config);
+        logEvent('Settings updated from mobile (v' + saved.settingsVersion + ')');
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.end(JSON.stringify({ ok: true, settingsVersion: saved.settingsVersion, updatedAt: saved.updatedAt }));
+      }).catch(function (err) {
+        res.statusCode = 400;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ ok: false, error: err.message }));
+      });
+      return;
+    }
+
     res.setHeader('Content-Type', 'application/json');
 
-    if (req.method === 'GET' && req.url === '/status') {
+    if (req.method === 'GET' && url === '/status') {
       res.end(JSON.stringify(lastStatus, null, 2));
       return;
     }
 
-    if (req.method === 'GET' && req.url === '/plan') {
+    if (req.method === 'GET' && url === '/plan') {
       res.end(JSON.stringify(planDay(cfg), null, 2));
       return;
     }
 
-    if (req.method === 'POST' && req.url === '/trigger-test') {
+    if (req.method === 'POST' && url === '/trigger-test') {
       sendWoL(cfg.tv.mac).then(function () {
         if (cfg.schedule.enableLaunch) {
           return launchApp(cfg);
@@ -246,7 +332,7 @@ function startHttpServer(cfg) {
       return;
     }
 
-    if (req.method === 'POST' && req.url === '/reload') {
+    if (req.method === 'POST' && url === '/reload') {
       config = loadConfig();
       cfg = config;
       res.end(JSON.stringify({ ok: true, planned: planDay(cfg) }));
@@ -259,6 +345,7 @@ function startHttpServer(cfg) {
 
   server.listen(port, host, function () {
     console.log('HTTP API on http://' + host + ':' + port);
+    console.log('Mobile UI: http://<LAN-IP>:' + port + '/mobile');
   });
 }
 
@@ -291,7 +378,7 @@ function main() {
   scheduleDailyReplan();
   startHttpServer(config);
 
-  console.log('AzanTV Companion running');
+  console.log('isAzan Companion running');
   console.log('TV IP:', config.tv.ip, 'MAC:', config.tv.mac);
 }
 

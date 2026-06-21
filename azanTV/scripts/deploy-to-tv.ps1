@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Build, sign, install, and launch AzanTV on a Samsung Smart TV (Developer Mode).
+  Build, sign, install, and launch isAzan on a Samsung Smart TV (Developer Mode).
 
 .EXAMPLE
   .\deploy-to-tv.ps1
@@ -78,8 +78,8 @@ function Invoke-TizenPackage {
         Write-Step "Paket signieren mit Profil '$CertProfile'"
         & $TizenCli package -t wgt -s $CertProfile -- . | Write-Host
         if ($LASTEXITCODE -ne 0) { throw "package fehlgeschlagen (Exit $LASTEXITCODE)" }
-        $wgt = Join-Path $Dir "AzanTV.wgt"
-        if (-not (Test-Path $wgt)) { throw "AzanTV.wgt wurde nicht erzeugt" }
+        $wgt = Join-Path $Dir "isAzan.wgt"
+        if (-not (Test-Path $wgt)) { throw "isAzan.wgt wurde nicht erzeugt" }
         $sizeKb = [math]::Round((Get-Item $wgt).Length / 1KB, 1)
         Write-Host "WGT: $wgt ($sizeKb KB)" -ForegroundColor Green
         return $wgt
@@ -94,7 +94,7 @@ if (-not (Test-Path $TizenCli)) {
 }
 
 $buildDir = $ProjectDir
-$wgtPath = Join-Path $ProjectDir "AzanTV.wgt"
+$wgtPath = Join-Path $ProjectDir "isAzan.wgt"
 
 function Test-BuildDirLocked {
     param([string]$Dir)
@@ -159,5 +159,5 @@ if (-not $SkipRun) {
 }
 
 Write-Host ''
-Write-Host 'AzanTV ist auf dem Fernseher installiert.' -ForegroundColor Green
+Write-Host 'isAzan ist auf dem Fernseher installiert.' -ForegroundColor Green
 Write-Host 'App in Smart Hub unter Meine Apps suchen (nicht im oeffentlichen Store).'

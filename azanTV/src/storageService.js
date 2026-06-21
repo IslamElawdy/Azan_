@@ -25,6 +25,8 @@ var StorageService = (function () {
         fajrAudio: 'same',
         volume: 80,
         exitDelaySeconds: 10,
+        tryStandbyAfterAzan: false,
+        companionUrl: '',
         enabledPrayers: {
             fajr: true,
             dhuhr: true,
@@ -121,7 +123,7 @@ var StorageService = (function () {
     }
 
     function getAlarmState() {
-        return readJson(ALARM_KEY, { scheduledAlarmId: null, nextPrayer: null, nextTime: null });
+        return readJson(ALARM_KEY, { scheduledAlarmId: null, nextPrayer: null, nextTime: null, isTest: false });
     }
 
     function saveAlarmState(state) {

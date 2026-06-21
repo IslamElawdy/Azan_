@@ -1,10 +1,17 @@
-/*global PrayerTimeService, AlarmService, document */
+/*global PrayerTimeService, AlarmService, BackgroundTheme, TvPowerService, document */
 /* exported MainScreen */
 var MainScreen = (function () {
     'use strict';
 
     var tickTimer = null;
     var elements = {};
+    var PRAYER_ICONS = {
+        fajr: '🌅',
+        dhuhr: '☀️',
+        asr: '🌤',
+        maghrib: '🌇',
+        isha: '🌙'
+    };
 
     function init() {
         elements.currentTime = document.getElementById('main-current-time');
@@ -12,7 +19,12 @@ var MainScreen = (function () {
         elements.countdown = document.getElementById('main-countdown');
         elements.prayerList = document.getElementById('main-prayer-list');
         elements.alarmStatus = document.getElementById('main-alarm-status');
+        elements.powerHint = document.getElementById('main-power-hint');
         elements.headerStatus = document.getElementById('header-status');
+
+        if (elements.powerHint && typeof TvPowerService !== 'undefined') {
+            elements.powerHint.textContent = TvPowerService.getPowerCapabilityText();
+        }
     }
 
     function show() {
@@ -26,32 +38,43 @@ var MainScreen = (function () {
         var tz = settings.timezone || 'Europe/Berlin';
         elements.currentTime.textContent = formatClock(now, tz);
 
+        BackgroundTheme.applyForSettings(settings, now);
+
         var today = PrayerTimeService.getTodayTimes(settings);
         var next = PrayerTimeService.getNextPrayer(settings, now);
 
         if (next) {
-            elements.nextPrayer.textContent = next.label + ' – ' + PrayerTimeService.formatTime(next.time, tz);
-            elements.countdown.textContent = 'Countdown: ' + PrayerTimeService.getCountdownText(next.time, now);
+            elements.nextPrayer.textContent = (PRAYER_ICONS[next.key] || '') + ' ' + next.label;
+            elements.countdown.textContent = PrayerTimeService.getCountdownText(next.time, now);
         } else {
             elements.nextPrayer.textContent = '—';
-            elements.countdown.textContent = 'Countdown: —';
+            elements.countdown.textContent = '—';
         }
 
         elements.prayerList.innerHTML = '';
         PrayerTimeService.PRAYER_KEYS.forEach(function (key) {
             var li = document.createElement('li');
+            li.className = 'prayer-card';
             if (!settings.enabledPrayers[key]) {
-                li.className = 'disabled';
+                li.className += ' disabled';
             }
             if (next && next.key === key) {
-                li.className = (li.className ? li.className + ' ' : '') + 'next';
+                li.className += ' next';
             }
+
+            var icon = document.createElement('span');
+            icon.className = 'prayer-card-icon';
+            icon.textContent = PRAYER_ICONS[key] || '•';
+
             var name = document.createElement('span');
-            name.className = 'name';
+            name.className = 'prayer-card-name';
             name.textContent = PrayerTimeService.PRAYER_LABELS[key];
+
             var time = document.createElement('span');
-            time.className = 'time';
+            time.className = 'prayer-card-time';
             time.textContent = PrayerTimeService.formatTime(today[key], tz);
+
+            li.appendChild(icon);
             li.appendChild(name);
             li.appendChild(time);
             elements.prayerList.appendChild(li);

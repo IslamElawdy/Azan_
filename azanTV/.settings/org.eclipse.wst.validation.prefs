@@ -1,0 +1,3 @@
+eclipse.preferences.version=1
+override=true
+manual=org.eclipse.wst.xml.core.internal.validation.XMLValidator;config.xml;-1;org.eclipse.wst.html.core.HTMLValidator;index.html;-1;

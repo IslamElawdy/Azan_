@@ -1,4 +1,4 @@
-/*global StorageService, PrayerTimeService, document */
+/*global StorageService, PrayerTimeService, TvPowerService, RemoteSettingsService, document */
 /* exported SettingsScreen */
 var SettingsScreen = (function () {
     'use strict';
@@ -16,6 +16,10 @@ var SettingsScreen = (function () {
         fields.fajrAudio = document.getElementById('setting-fajr-audio');
         fields.volume = document.getElementById('setting-volume');
         fields.exitDelay = document.getElementById('setting-exit-delay');
+        fields.companionUrl = document.getElementById('setting-companion-url');
+        fields.tryStandbyAfter = document.getElementById('toggle-standby-after');
+        fields.powerHint = document.getElementById('setting-power-hint');
+        fields.mobileHint = document.getElementById('setting-mobile-hint');
         fields.toggles = {
             fajr: document.getElementById('toggle-fajr'),
             dhuhr: document.getElementById('toggle-dhuhr'),
@@ -41,6 +45,28 @@ var SettingsScreen = (function () {
                 }
             }
         });
+
+        if (fields.powerHint && typeof TvPowerService !== 'undefined') {
+            fields.powerHint.textContent = TvPowerService.getPowerCapabilityText();
+        }
+
+        if (fields.companionUrl) {
+            fields.companionUrl.addEventListener('input', function () {
+                updateMobileHint(fields.companionUrl.value);
+            });
+        }
+    }
+
+    function updateMobileHint(companionUrl) {
+        if (!fields.mobileHint || typeof RemoteSettingsService === 'undefined') {
+            return;
+        }
+        var mobile = RemoteSettingsService.getMobileUrl(companionUrl);
+        if (mobile) {
+            fields.mobileHint.textContent = 'Am Handy im Browser öffnen: ' + mobile;
+        } else {
+            fields.mobileHint.textContent = 'Companion auf PC/Raspberry starten (npm start), dann URL eintragen.';
+        }
     }
 
     function show() {
@@ -60,6 +86,13 @@ var SettingsScreen = (function () {
         fields.fajrAudio.value = settings.fajrAudio;
         fields.volume.value = settings.volume;
         fields.exitDelay.value = settings.exitDelaySeconds;
+        if (fields.companionUrl) {
+            fields.companionUrl.value = settings.companionUrl || '';
+            updateMobileHint(settings.companionUrl);
+        }
+        if (fields.tryStandbyAfter) {
+            fields.tryStandbyAfter.checked = !!settings.tryStandbyAfterAzan;
+        }
 
         PrayerTimeService.PRAYER_KEYS.forEach(function (key) {
             fields.toggles[key].checked = settings.enabledPrayers[key] !== false;
@@ -79,6 +112,8 @@ var SettingsScreen = (function () {
         settings.fajrAudio = fields.fajrAudio.value;
         settings.volume = parseInt(fields.volume.value, 10) || 80;
         settings.exitDelaySeconds = parseInt(fields.exitDelay.value, 10) || 10;
+        settings.companionUrl = fields.companionUrl ? fields.companionUrl.value.trim() : '';
+        settings.tryStandbyAfterAzan = fields.tryStandbyAfter ? fields.tryStandbyAfter.checked : false;
 
         PrayerTimeService.PRAYER_KEYS.forEach(function (key) {
             settings.enabledPrayers[key] = fields.toggles[key].checked;

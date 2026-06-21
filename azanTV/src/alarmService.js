@@ -28,10 +28,8 @@ var AlarmService = (function () {
         );
     }
 
-    function parsePayloadFromLaunch() {
+    function parsePayloadFromAppControl(req) {
         try {
-            var app = tizen.application.getCurrentApplication();
-            var req = app.getRequestedAppControl();
             if (!req || !req.appControl) {
                 return null;
             }
@@ -54,6 +52,16 @@ var AlarmService = (function () {
         return null;
     }
 
+    function parsePayloadFromLaunch() {
+        try {
+            var app = tizen.application.getCurrentApplication();
+            return parsePayloadFromAppControl(app.getRequestedAppControl());
+        } catch (e) {
+            console.warn('Launch payload parse failed:', e);
+        }
+        return null;
+    }
+
     function removeAlarmById(alarmId) {
         if (!isAvailable() || !alarmId || alarmId === 'dev-mode') {
             return;
@@ -71,7 +79,8 @@ var AlarmService = (function () {
         StorageService.saveAlarmState({
             scheduledAlarmId: null,
             nextPrayer: null,
-            nextTime: null
+            nextTime: null,
+            isTest: false
         });
     }
 
@@ -109,8 +118,11 @@ var AlarmService = (function () {
         if (!state || !state.scheduledAlarmId || !state.nextTime || !state.nextPrayer) {
             return false;
         }
+        if (new Date(state.nextTime).getTime() <= Date.now()) {
+            return false;
+        }
         if (state.scheduledAlarmId === 'dev-mode') {
-            return new Date(state.nextTime).getTime() > Date.now();
+            return true;
         }
         if (!isAvailable()) {
             return false;
@@ -124,13 +136,25 @@ var AlarmService = (function () {
         }
     }
 
-    function scheduleAt(date, prayerKey) {
+    function storedAlarmAsNext(state) {
+        return {
+            key: state.nextPrayer,
+            label: PrayerTimeService.PRAYER_LABELS[state.nextPrayer] || state.nextPrayer,
+            time: new Date(state.nextTime),
+            isTest: !!state.isTest
+        };
+    }
+
+    function scheduleAt(date, prayerKey, options) {
+        options = options || {};
+
         if (!isAvailable()) {
             console.warn('Alarm API not available (browser/dev mode)');
             StorageService.saveAlarmState({
                 scheduledAlarmId: 'dev-mode',
                 nextPrayer: prayerKey,
-                nextTime: date.toISOString()
+                nextTime: date.toISOString(),
+                isTest: !!options.isTest
             });
             return 'dev-mode';
         }
@@ -148,7 +172,8 @@ var AlarmService = (function () {
         StorageService.saveAlarmState({
             scheduledAlarmId: alarm.id,
             nextPrayer: prayerKey,
-            nextTime: date.toISOString()
+            nextTime: date.toISOString(),
+            isTest: !!options.isTest
         });
 
         return alarm.id;
@@ -160,13 +185,18 @@ var AlarmService = (function () {
             clearStoredAlarmState();
             return null;
         }
-        scheduleAt(next.time, next.key);
+        scheduleAt(next.time, next.key, { isTest: false });
         return next;
     }
 
-    function scheduleRelativeSeconds(seconds, prayerKey) {
+    function scheduleRelativeSeconds(seconds, prayerKey, options) {
+        var opts = options || {};
+        if (opts.isTest === undefined) {
+            opts.isTest = true;
+        }
         var date = new Date(Date.now() + seconds * 1000);
-        return scheduleAt(date, prayerKey || 'dhuhr');
+        scheduleAt(date, prayerKey || 'dhuhr', opts);
+        return date;
     }
 
     function getStatusText() {
@@ -176,7 +206,8 @@ var AlarmService = (function () {
         }
         var when = new Date(state.nextTime);
         var tz = StorageService.getSettings().timezone || 'Europe/Berlin';
-        return 'Geplant: ' + PrayerTimeService.PRAYER_LABELS[state.nextPrayer] +
+        var prefix = state.isTest ? 'Test' : 'Geplant';
+        return prefix + ': ' + PrayerTimeService.PRAYER_LABELS[state.nextPrayer] +
             ' um ' + PrayerTimeService.formatTime(when, tz) +
             ' (ID: ' + (state.scheduledAlarmId || '—') + ')';
     }
@@ -193,30 +224,48 @@ var AlarmService = (function () {
         }
 
         var state = StorageService.getAlarmState();
-        if (!isStoredAlarmValid(state)) {
-            return scheduleNextPrayer(settings);
+        if (isStoredAlarmValid(state)) {
+            if (state.isTest) {
+                return storedAlarmAsNext(state);
+            }
+
+            removeDuplicateAzanAlarms(state.scheduledAlarmId);
+
+            var scheduled = new Date(state.nextTime);
+            var drift = Math.abs(scheduled.getTime() - next.time.getTime());
+            if (drift <= 60000 && state.nextPrayer === next.key) {
+                return next;
+            }
         }
 
-        removeDuplicateAzanAlarms(state.scheduledAlarmId);
+        return scheduleNextPrayer(settings);
+    }
 
-        var scheduled = new Date(state.nextTime);
-        var drift = Math.abs(scheduled.getTime() - next.time.getTime());
-        if (drift > 60000 || state.nextPrayer !== next.key || scheduled.getTime() <= Date.now()) {
-            return scheduleNextPrayer(settings);
+    function markAlarmHandled() {
+        var state = StorageService.getAlarmState();
+        if (state.isTest) {
+            clearStoredAlarmState();
+            return;
         }
-
-        return next;
+        StorageService.saveAlarmState({
+            scheduledAlarmId: null,
+            nextPrayer: state.nextPrayer,
+            nextTime: state.nextTime,
+            isTest: false
+        });
     }
 
     return {
         OPERATION: OPERATION,
         isAvailable: isAvailable,
         parsePayloadFromLaunch: parsePayloadFromLaunch,
+        parsePayloadFromAppControl: parsePayloadFromAppControl,
         scheduleNextPrayer: scheduleNextPrayer,
         scheduleAt: scheduleAt,
         scheduleRelativeSeconds: scheduleRelativeSeconds,
         removeAllAlarms: clearStoredAlarmState,
         getStatusText: getStatusText,
-        syncOnStartup: syncOnStartup
+        syncOnStartup: syncOnStartup,
+        markAlarmHandled: markAlarmHandled
     };
 }());

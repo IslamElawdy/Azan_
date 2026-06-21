@@ -1,4 +1,4 @@
-/*global PrayerTimeService, StorageService, document */
+/*global PrayerTimeService, StorageService, BackgroundTheme, document */
 /* exported PrayerScreen */
 var PrayerScreen = (function () {
     'use strict';
@@ -9,12 +9,18 @@ var PrayerScreen = (function () {
         elements.name = document.getElementById('prayer-name');
         elements.time = document.getElementById('prayer-time');
         elements.status = document.getElementById('prayer-status');
+        elements.backdrop = document.getElementById('prayer-backdrop');
     }
 
     function show(prayerKey, settings) {
         document.getElementById('screen-main').classList.remove('screen-active');
         document.getElementById('screen-settings').classList.remove('screen-active');
         document.getElementById('screen-prayer').classList.add('screen-active');
+
+        BackgroundTheme.applyForPrayer();
+        if (elements.backdrop) {
+            BackgroundTheme.paintBackground(elements.backdrop);
+        }
 
         var cfg = settings || StorageService.getSettings();
         var label = PrayerTimeService.PRAYER_LABELS[prayerKey] || prayerKey;

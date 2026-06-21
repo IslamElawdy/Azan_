@@ -9,171 +9,315 @@ html, body {
     height: 1080px;
     overflow: hidden;
     font-family: "Samsung Sans", "Segoe UI", Arial, sans-serif;
-    background: #0b1220;
-    color: #f0f4f8;
+    color: #f8fafc;
 }
 
-#app {
+/* --- Photo background (Masjid an-Nabawi) --- */
+.bg-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 1920px;
+    height: 1080px;
+    z-index: 0;
+    overflow: hidden;
+    background-color: #0f172a;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+}
+
+.bg-layer.has-photo {
+    background-color: transparent;
+}
+
+.bg-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    padding: 48px 64px;
+    z-index: 1;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.72) 0%, rgba(30, 27, 75, 0.45) 45%, rgba(15, 23, 42, 0.78) 100%);
+}
+
+body.prayer-active .bg-layer.theme-prayer .bg-overlay {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.12) 0%, rgba(15, 23, 42, 0.28) 55%, rgba(15, 23, 42, 0.45) 100%);
+}
+
+body.prayer-active .app-header {
+    display: none;
+}
+
+body.prayer-active #app {
+    background: transparent;
+}
+
+.bg-sky,
+.bg-hills,
+.bg-glow {
+    display: none;
+}
+
+/* --- App shell --- */
+#app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    padding: 40px 56px 32px;
     display: flex;
     flex-direction: column;
+}
+
+.glass-panel {
+    background: rgba(15, 23, 42, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 24px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.28);
 }
 
 .app-header {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 32px;
-    border-bottom: 2px solid #1e293b;
-    padding-bottom: 16px;
+    align-items: center;
+    padding: 20px 32px;
+    margin-bottom: 28px;
+}
+
+.brand {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.brand-icon {
+    font-size: 40px;
+    margin-right: 16px;
+    line-height: 1;
 }
 
 .app-title {
-    font-size: 48px;
+    font-size: 44px;
     font-weight: 700;
-    color: #38bdf8;
+    letter-spacing: 0.5px;
+    color: #f8fafc;
 }
 
 .header-status {
-    font-size: 28px;
-    color: #94a3b8;
+    font-size: 24px;
+    color: rgba(226, 232, 240, 0.88);
+    max-width: 900px;
+    text-align: right;
+    line-height: 1.35;
 }
 
 .screen {
     display: none;
     flex: 1;
     flex-direction: column;
+    min-height: 0;
 }
 
 .screen-active {
     display: flex;
 }
 
-.screen > .panel,
-.screen > .main-nav,
-.screen > .settings-nav,
-.screen > .settings-grid,
-.screen > .screen-title {
-    margin-top: 24px;
-}
-
-.screen > :first-child {
-    margin-top: 0;
-}
-
 .screen-title {
     font-size: 40px;
-    margin-bottom: 8px;
-}
-
-.panel {
-    background: #111827;
-    border: 1px solid #1f2937;
-    border-radius: 16px;
-    padding: 24px 32px;
+    margin-bottom: 16px;
+    font-weight: 600;
 }
 
 .label {
-    font-size: 24px;
-    color: #94a3b8;
+    font-size: 22px;
+    color: rgba(203, 213, 225, 0.9);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.section-title {
+    font-size: 26px;
+    color: rgba(226, 232, 240, 0.95);
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* --- Main screen layout --- */
+.main-layout {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    min-height: 0;
+}
+
+.hero-panel {
+    flex: 1;
+    padding: 36px 40px;
+    margin-right: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.times-panel {
+    width: 820px;
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+}
+
+.value-hero {
+    font-size: 108px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    line-height: 1;
+    margin-bottom: 28px;
+    color: #ffffff;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+.hero-next {
+    margin-top: 12px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.value-next {
+    font-size: 52px;
+    font-weight: 600;
+    color: #fde68a;
     margin-bottom: 8px;
 }
 
-.value-large {
-    font-size: 72px;
-    font-weight: 700;
-    letter-spacing: 2px;
+.value-countdown {
+    font-size: 36px;
+    color: #bae6fd;
+    font-weight: 500;
 }
 
-.value-medium {
-    font-size: 48px;
-    font-weight: 600;
-    color: #38bdf8;
-}
-
-.value-small {
-    font-size: 32px;
-    color: #cbd5e1;
-}
-
-.prayer-list {
+.prayer-grid {
     list-style: none;
     display: flex;
     flex-direction: row;
-    flex-wrap: nowrap;
-}
-
-.prayer-list li {
+    flex-wrap: wrap;
     flex: 1;
-    background: #0f172a;
-    border-radius: 12px;
-    padding: 16px;
+    align-content: flex-start;
+}
+
+.prayer-card {
+    width: 31%;
+    margin-right: 3.5%;
+    margin-bottom: 16px;
+    padding: 20px 16px;
+    border-radius: 18px;
     text-align: center;
-    margin-left: 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.prayer-list li:first-child {
-    margin-left: 0;
+.prayer-card:nth-child(3n) {
+    margin-right: 0;
 }
 
-.prayer-list .name {
+.prayer-card-icon {
     display: block;
-    font-size: 28px;
-    color: #94a3b8;
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.prayer-card-name {
+    display: block;
+    font-size: 24px;
+    color: rgba(203, 213, 225, 0.95);
     margin-bottom: 8px;
 }
 
-.prayer-list .time {
+.prayer-card-time {
     display: block;
-    font-size: 36px;
-    font-weight: 600;
+    font-size: 34px;
+    font-weight: 700;
+    color: #f8fafc;
 }
 
-.prayer-list li.disabled {
-    opacity: 0.4;
+.prayer-card.disabled {
+    opacity: 0.38;
 }
 
-.prayer-list li.next {
-    outline: 3px solid #38bdf8;
+.prayer-card.next {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.18);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35);
+}
+
+.info-panel {
+    margin-top: 20px;
+    padding: 18px 28px;
+}
+
+.value-status {
+    font-size: 28px;
+    color: #e2e8f0;
+    margin-bottom: 8px;
+}
+
+.power-hint {
+    font-size: 20px;
+    line-height: 1.45;
+    color: rgba(203, 213, 225, 0.85);
 }
 
 .main-nav, .settings-nav {
     display: flex;
     flex-direction: row;
-    margin-top: auto;
-    padding-top: 24px;
+    margin-top: 20px;
+    padding-top: 8px;
 }
 
 .nav-btn {
-    font-size: 28px;
-    padding: 20px 36px;
-    border: none;
-    border-radius: 12px;
-    background: #1e293b;
+    font-size: 26px;
+    padding: 18px 32px;
+    border-radius: 14px;
+    background: rgba(30, 41, 59, 0.88);
     color: #f8fafc;
     cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .nav-btn + .nav-btn {
-    margin-left: 24px;
+    margin-left: 20px;
+}
+
+.nav-btn-accent {
+    background: rgba(180, 83, 9, 0.75);
+    border-color: rgba(251, 191, 36, 0.45);
 }
 
 .nav-btn.focused,
 .focusable.focused {
     outline: 4px solid #38bdf8;
-    outline-offset: 4px;
+    outline-offset: 3px;
     background: #2563eb;
+    border-color: #7dd3fc;
 }
 
+.setting-row.focused {
+    outline: 4px solid #38bdf8;
+    outline-offset: 3px;
+    border-radius: 12px;
+    background: rgba(37, 99, 235, 0.2);
+}
+
+/* --- Settings --- */
 .settings-grid {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     overflow-y: auto;
-    max-height: 680px;
-    padding-right: 16px;
+    max-height: 640px;
+    padding-right: 12px;
 }
 
 .setting-row {
@@ -183,6 +327,11 @@ html, body {
     margin-right: 4%;
     margin-bottom: 16px;
     font-size: 24px;
+}
+
+.setting-row-wide {
+    width: 100%;
+    margin-right: 0;
 }
 
 .setting-row:nth-child(2n) {
@@ -196,29 +345,42 @@ html, body {
 .setting-input {
     font-size: 28px;
     padding: 12px 16px;
-    border-radius: 8px;
-    border: 1px solid #334155;
-    background: #0f172a;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    background: rgba(15, 23, 42, 0.75);
     color: #f8fafc;
+}
+
+.setting-row select.setting-input {
+    pointer-events: none;
+}
+
+.setting-row.focused .setting-input {
+    border-color: #38bdf8;
 }
 
 .setting-fieldset {
     width: 100%;
-    border: 1px solid #334155;
-    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 16px;
     padding: 16px 24px;
     font-size: 24px;
     margin-bottom: 16px;
+    background: rgba(15, 23, 42, 0.45);
 }
 
 .setting-fieldset legend {
     padding: 0 8px;
-    color: #94a3b8;
+    color: #cbd5e1;
 }
 
 .audio-hint {
-    border-color: #f59e0b;
-    background: #1c1917;
+    border-color: rgba(245, 158, 11, 0.55);
+    background: rgba(28, 25, 23, 0.55);
+}
+
+.power-hint-box {
+    border-color: rgba(56, 189, 248, 0.4);
 }
 
 .audio-hint-text,
@@ -247,37 +409,73 @@ html, body {
 
 .toggle-row input,
 .offset-row input {
-    margin-left: 12px;
+    margin-right: 12px;
 }
 
 .offset-input {
     width: 100px;
+    margin-left: 12px;
 }
 
+/* --- Prayer screen --- */
 .screen-prayer {
     align-items: center;
     justify-content: center;
     text-align: center;
-    background: radial-gradient(circle at center, #1e3a5f 0%, #0b1220 70%);
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    z-index: 5;
+    background: transparent;
+}
+
+.prayer-backdrop {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    z-index: 0;
+    background-color: #0f172a;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+}
+
+.prayer-content {
+    position: relative;
+    z-index: 2;
+    padding: 56px 80px;
+    min-width: 720px;
+    background: rgba(15, 23, 42, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
 }
 
 .prayer-label {
-    font-size: 32px;
-    color: #94a3b8;
+    font-size: 28px;
+    color: rgba(203, 213, 225, 0.9);
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
 .prayer-name {
     font-size: 96px;
-    color: #38bdf8;
+    color: #fde68a;
     margin: 24px 0;
+    font-weight: 700;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .prayer-time {
     font-size: 64px;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
+    font-weight: 600;
 }
 
 .prayer-status {
-    font-size: 36px;
+    font-size: 32px;
     color: #cbd5e1;
 }

@@ -6,6 +6,7 @@
         </platform>
     </platforms>
     <package>
-        <blacklist/>
+        <blacklist>.buildResult</blacklist>
+        <blacklist>.metadata</blacklist>
     </package>
 </tproject>

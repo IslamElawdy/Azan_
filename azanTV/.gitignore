@@ -1,0 +1,7 @@
+.buildResult/
+.metadata/
+*.wgt
+*.wgt.sha256
+signature1.xml
+author-signature.xml
+.manifest.tmp

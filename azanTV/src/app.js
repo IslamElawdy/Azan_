@@ -1,4 +1,4 @@
-/*global StorageService, PrayerTimeService, AlarmService, AudioService, TvPowerService, TestModeService, MainScreen, SettingsScreen, PrayerScreen, document */
+/*global StorageService, PrayerTimeService, AlarmService, AudioService, TvPowerService, TestModeService, RemoteSettingsService, MainScreen, SettingsScreen, PrayerScreen, BackgroundTheme, document */
 /* exported AzanApp */
 var AzanApp = (function () {
     'use strict';
@@ -6,8 +6,18 @@ var AzanApp = (function () {
     var settings = null;
     var focusables = [];
     var focusIndex = 0;
+    var prayerEventActive = false;
     var KEY_BACK = 10009;
     var KEY_EXIT = 10182;
+
+    function registerAppControlListener() {
+        window.addEventListener('appcontrol', function () {
+            var payload = AlarmService.parsePayloadFromLaunch();
+            if (payload && payload.prayer) {
+                handlePrayerEvent(payload.prayer);
+            }
+        });
+    }
 
     function init() {
         settings = StorageService.getSettings();
@@ -16,7 +26,9 @@ var AzanApp = (function () {
         MainScreen.init();
         SettingsScreen.init();
         PrayerScreen.init();
+        TestModeService.init(handlePrayerEvent);
 
+        registerAppControlListener();
         bindNavigation();
         bindRemoteKeys();
         refreshFocusables(document.getElementById('screen-main'));
@@ -24,6 +36,28 @@ var AzanApp = (function () {
         TvPowerService.registerVisibilityHandler(function () {
             MainScreen.render(settings);
         });
+
+        BackgroundTheme.applyForSettings(settings);
+        BackgroundTheme.paintBackground(document.getElementById('bg-layer'));
+
+        RemoteSettingsService.syncOnce(settings).then(function (result) {
+            if (result.synced && result.settings) {
+                settings = result.settings;
+                MainScreen.setHeaderStatus('Einstellungen vom Handy synchronisiert');
+            }
+        }).catch(function (err) {
+            console.warn('Initial remote sync:', err.message);
+        });
+
+        RemoteSettingsService.startPolling(function () {
+            return settings;
+        }, function (merged) {
+            settings = merged;
+            if (isScreenActive('screen-main')) {
+                MainScreen.render(settings);
+                MainScreen.setHeaderStatus('Aktualisiert vom Companion');
+            }
+        }, 60000);
 
         var launchPayload = AlarmService.parsePayloadFromLaunch();
         if (launchPayload && launchPayload.prayer) {
@@ -41,8 +75,9 @@ var AzanApp = (function () {
             return settings;
         });
         if (next) {
+            var prefix = next.isTest ? 'Test-Alarm' : 'Nächster Alarm';
             MainScreen.setHeaderStatus(
-                'Nächster Alarm: ' + next.label + ' um ' + PrayerTimeService.formatTime(next.time, settings.timezone)
+                prefix + ': ' + next.label + ' um ' + PrayerTimeService.formatTime(next.time, settings.timezone)
             );
         } else {
             MainScreen.setHeaderStatus('Bereit');
@@ -50,19 +85,30 @@ var AzanApp = (function () {
     }
 
     function handlePrayerEvent(prayerKey) {
+        if (prayerEventActive) {
+            return;
+        }
+        prayerEventActive = true;
+        TestModeService.setHandlingPrayer(true);
+        AlarmService.markAlarmHandled();
+
         MainScreen.stopTick();
+        BackgroundTheme.applyForPrayer();
         PrayerScreen.show(prayerKey, settings);
         TvPowerService.disableScreenSaver();
 
         AudioService.playAzan(prayerKey, settings).then(function () {
             PrayerScreen.setStatus('Azan beendet. App wird geschlossen…');
             AlarmService.scheduleNextPrayer(settings);
-            TvPowerService.exitApp(settings.exitDelaySeconds);
+            TvPowerService.finishAfterAzan(settings);
         }).catch(function (err) {
             console.error(err);
             PrayerScreen.setStatus('Audio-Fehler: ' + err.message + '. App wird geschlossen…');
             AlarmService.scheduleNextPrayer(settings);
-            TvPowerService.exitApp(settings.exitDelaySeconds);
+            TvPowerService.finishAfterAzan(settings);
+        }).then(function () {
+            prayerEventActive = false;
+            TestModeService.setHandlingPrayer(false);
         });
     }
 
@@ -83,6 +129,12 @@ var AzanApp = (function () {
                 MainScreen.render(settings);
             });
         });
+        document.getElementById('btn-test-standby').addEventListener('click', function () {
+            TestModeService.scheduleStandbyTest(settings, function (msg) {
+                MainScreen.setHeaderStatus(msg);
+                MainScreen.render(settings);
+            });
+        });
     }
 
     function openSettings() {
@@ -94,6 +146,8 @@ var AzanApp = (function () {
 
     function openMain() {
         MainScreen.show();
+        BackgroundTheme.clearPrayerMode();
+        BackgroundTheme.applyForSettings(settings);
         MainScreen.render(settings);
         MainScreen.startTick(function () {
             return settings;
@@ -116,17 +170,22 @@ var AzanApp = (function () {
 
     function testAzanNow() {
         MainScreen.stopTick();
+        BackgroundTheme.applyForPrayer();
         PrayerScreen.show('dhuhr', settings);
         TestModeService.playImmediateTest(settings, {
             onComplete: function () {
                 PrayerScreen.setStatus('Test abgeschlossen');
                 setTimeout(function () {
+                    prayerEventActive = false;
                     openMain();
                 }, settings.exitDelaySeconds * 1000);
             },
             onError: function (err) {
                 PrayerScreen.setStatus('Fehler: ' + err.message);
-                setTimeout(openMain, 3000);
+                setTimeout(function () {
+                    prayerEventActive = false;
+                    openMain();
+                }, 3000);
             }
         });
     }
@@ -153,6 +212,54 @@ var AzanApp = (function () {
         }
     }
 
+    function getSelectInRow(el) {
+        if (!el || !el.querySelector) {
+            return null;
+        }
+        return el.querySelector('select');
+    }
+
+    function cycleSelect(select, delta) {
+        if (!select || !select.options || !select.options.length) {
+            return;
+        }
+        var next = select.selectedIndex + delta;
+        if (next < 0) {
+            next = select.options.length - 1;
+        }
+        if (next >= select.options.length) {
+            next = 0;
+        }
+        select.selectedIndex = next;
+        try {
+            var evt = document.createEvent('HTMLEvents');
+            evt.initEvent('change', true, false);
+            select.dispatchEvent(evt);
+        } catch (err) {
+            console.warn('select change event failed:', err);
+        }
+    }
+
+    function handleSelectKey(key) {
+        if (!isScreenActive('screen-settings') || focusables.length === 0) {
+            return false;
+        }
+        var el = focusables[focusIndex];
+        var select = getSelectInRow(el);
+        if (!select) {
+            return false;
+        }
+        if (key === 37) {
+            cycleSelect(select, -1);
+            return true;
+        }
+        if (key === 39 || key === 13) {
+            cycleSelect(select, 1);
+            return true;
+        }
+        return false;
+    }
+
     function bindRemoteKeys() {
         document.addEventListener('keydown', function (e) {
             var key = e.keyCode;
@@ -177,6 +284,11 @@ var AzanApp = (function () {
                 return;
             }
 
+            if (handleSelectKey(key)) {
+                e.preventDefault();
+                return;
+            }
+
             if (key === 37 || key === 38) {
                 focusIndex = (focusIndex - 1 + focusables.length) % focusables.length;
                 updateFocusVisual();
@@ -189,12 +301,12 @@ var AzanApp = (function () {
                 var el = focusables[focusIndex];
                 if (el.tagName === 'BUTTON') {
                     el.click();
-                } else if (el.tagName === 'LABEL' || el.tagName === 'SELECT' || el.tagName === 'INPUT') {
-                    var input = el.querySelector('input, select') || el;
+                } else if (getSelectInRow(el)) {
+                    cycleSelect(getSelectInRow(el), 1);
+                } else if (el.tagName === 'LABEL' || el.tagName === 'INPUT') {
+                    var input = el.querySelector('input') || el;
                     if (input.tagName === 'INPUT' && input.type === 'checkbox') {
                         input.checked = !input.checked;
-                    } else if (input.focus) {
-                        input.focus();
                     }
                 }
                 e.preventDefault();

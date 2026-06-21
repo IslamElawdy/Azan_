@@ -4,5 +4,6 @@ companion/config.json
 .DS_Store
 *.wgt
 *.wgt.sha256
-build/
-dist/
+azanTV-deploy*/
+azanTV/.buildResult/
+azanTV/.metadata/

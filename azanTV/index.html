@@ -1,45 +1,59 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=1920, height=1080">
-    <title>AzanTV</title>
-    <link rel="stylesheet" href="css/app.css">
-    <script src="$WEBAPIS/webapis/webapis.js"></script>
+    <title>isAzan</title>
+    <link rel="stylesheet" type="text/css" href="css/app.css">
+    <script type="text/javascript" src="$WEBAPIS/webapis/webapis.js"></script>
 </head>
 <body>
+    <div id="bg-layer" class="bg-layer has-photo theme-default">
+        <div class="bg-overlay"></div>
+    </div>
+
     <div id="app">
-        <header class="app-header">
-            <h1 class="app-title">AzanTV</h1>
+        <div class="app-header glass-panel">
+            <div class="brand">
+                <span class="brand-icon">&#9774;</span>
+                <h1 class="app-title">isAzan</h1>
+            </div>
             <p id="header-status" class="header-status">Initialisiere…</p>
-        </header>
+        </div>
 
-        <main id="screen-main" class="screen screen-active">
-            <section class="panel panel-clock">
-                <p class="label">Aktuelle Uhrzeit</p>
-                <p id="main-current-time" class="value-large">--:--:--</p>
-            </section>
-            <section class="panel panel-next">
-                <p class="label">Nächstes Gebet</p>
-                <p id="main-next-prayer" class="value-medium">—</p>
-                <p id="main-countdown" class="value-small">Countdown: —</p>
-            </section>
-            <section class="panel panel-times">
-                <p class="label">Heutige Gebetszeiten</p>
-                <ul id="main-prayer-list" class="prayer-list"></ul>
-            </section>
-            <section class="panel panel-status">
+        <div id="screen-main" class="screen screen-active">
+            <div class="main-layout">
+                <div class="hero-panel glass-panel">
+                    <p class="label">Aktuelle Uhrzeit</p>
+                    <p id="main-current-time" class="value-hero">--:--:--</p>
+                    <div class="hero-next">
+                        <p class="label">Nächstes Gebet</p>
+                        <p id="main-next-prayer" class="value-next">—</p>
+                        <p id="main-countdown" class="value-countdown">—</p>
+                    </div>
+                </div>
+
+                <div class="times-panel glass-panel">
+                    <p class="section-title">Heutige Gebetszeiten</p>
+                    <ul id="main-prayer-list" class="prayer-grid"></ul>
+                </div>
+            </div>
+
+            <div class="info-panel glass-panel">
                 <p class="label">Alarm-Status</p>
-                <p id="main-alarm-status" class="value-small">—</p>
-            </section>
-            <nav class="main-nav">
-                <button id="btn-open-settings" class="nav-btn focusable" tabindex="0">Einstellungen</button>
-                <button id="btn-test-30s" class="nav-btn focusable" tabindex="0">Test: Azan in 30 s</button>
-                <button id="btn-test-1min" class="nav-btn focusable" tabindex="0">Test: Alarm in 1 min</button>
-            </nav>
-        </main>
+                <p id="main-alarm-status" class="value-status">—</p>
+                <p id="main-power-hint" class="power-hint">—</p>
+            </div>
 
-        <main id="screen-settings" class="screen">
+            <div class="main-nav">
+                <button id="btn-open-settings" class="nav-btn focusable" tabindex="0" type="button">Einstellungen</button>
+                <button id="btn-test-30s" class="nav-btn focusable" tabindex="0" type="button">Test: Azan in 30 s</button>
+                <button id="btn-test-1min" class="nav-btn focusable" tabindex="0" type="button">Test: Alarm in 1 min</button>
+                <button id="btn-test-standby" class="nav-btn nav-btn-accent focusable" tabindex="0" type="button">Standby-Test (90 s)</button>
+            </div>
+        </div>
+
+        <div id="screen-settings" class="screen">
             <h2 class="screen-title">Einstellungen</h2>
             <div class="settings-grid">
                 <label class="setting-row focusable" tabindex="0">
@@ -53,11 +67,11 @@
                 </label>
                 <label class="setting-row focusable" tabindex="0">
                     <span>Breitengrad</span>
-                    <input id="setting-latitude" type="number" step="0.0001" class="setting-input" value="52.52">
+                    <input id="setting-latitude" type="text" class="setting-input" value="52.52">
                 </label>
                 <label class="setting-row focusable" tabindex="0">
                     <span>Längengrad</span>
-                    <input id="setting-longitude" type="number" step="0.0001" class="setting-input" value="13.405">
+                    <input id="setting-longitude" type="text" class="setting-input" value="13.405">
                 </label>
                 <label class="setting-row focusable" tabindex="0">
                     <span>Zeitzone</span>
@@ -82,11 +96,6 @@
                         <option value="Hanafi">Hanafi</option>
                     </select>
                 </label>
-                <fieldset class="setting-fieldset audio-hint">
-                    <legend>Azan-Audio</legend>
-                    <p class="audio-hint-text">MP3-Dateien müssen im Tizen-Projekt unter <code>azanTV/assets/azan/</code> liegen. Nach dem Hinzufügen neuer Dateien: <strong>neu bauen</strong> und auf den TV installieren.</p>
-                    <p class="audio-hint-files">Verfügbar: <code>Abdul-Basit.mp3</code>, <code>Adhan-Egypt.mp3</code>, <code>makkah.mp3</code>, <code>madinah.mp3</code>, <code>fajr.mp3</code></p>
-                </fieldset>
                 <label class="setting-row focusable" tabindex="0">
                     <span>Azan-Audio</span>
                     <select id="setting-audio" class="setting-input">
@@ -109,54 +118,75 @@
                 </label>
                 <label class="setting-row focusable" tabindex="0">
                     <span>Lautstärke (0–100)</span>
-                    <input id="setting-volume" type="number" min="0" max="100" class="setting-input" value="80">
+                    <input id="setting-volume" type="text" class="setting-input" value="80">
                 </label>
                 <label class="setting-row focusable" tabindex="0">
                     <span>Wartezeit nach Azan (s)</span>
-                    <input id="setting-exit-delay" type="number" min="0" max="120" class="setting-input" value="10">
+                    <input id="setting-exit-delay" type="text" class="setting-input" value="10">
                 </label>
+                <label class="toggle-row focusable setting-row-wide" tabindex="0">
+                    <input id="toggle-standby-after" type="checkbox">
+                    Standby nach Azan versuchen (meist nur B2B-TVs)
+                </label>
+                <label class="setting-row focusable" tabindex="0">
+                    <span>Companion-URL (Handy-Steuerung)</span>
+                    <input id="setting-companion-url" type="text" class="setting-input" value="">
+                </label>
+                <fieldset class="setting-fieldset power-hint-box">
+                    <legend>Handy-Steuerung</legend>
+                    <p id="setting-mobile-hint" class="audio-hint-text">Companion auf PC/Raspberry starten, dann im Handy-Browser die Mobile-URL öffnen.</p>
+                </fieldset>
+                <fieldset class="setting-fieldset power-hint-box">
+                    <legend>TV-Einschalten / Ausschalten</legend>
+                    <p id="setting-power-hint" class="audio-hint-text">—</p>
+                </fieldset>
                 <fieldset class="setting-fieldset">
                     <legend>Gebete aktiv</legend>
-                    <label class="toggle-row focusable" tabindex="0"><input id="toggle-fajr" type="checkbox" checked> Fajr</label>
-                    <label class="toggle-row focusable" tabindex="0"><input id="toggle-dhuhr" type="checkbox" checked> Dhuhr</label>
-                    <label class="toggle-row focusable" tabindex="0"><input id="toggle-asr" type="checkbox" checked> Asr</label>
-                    <label class="toggle-row focusable" tabindex="0"><input id="toggle-maghrib" type="checkbox" checked> Maghrib</label>
-                    <label class="toggle-row focusable" tabindex="0"><input id="toggle-isha" type="checkbox" checked> Isha</label>
+                    <label class="toggle-row focusable" tabindex="0"><input id="toggle-fajr" type="checkbox" checked="checked"> Fajr</label>
+                    <label class="toggle-row focusable" tabindex="0"><input id="toggle-dhuhr" type="checkbox" checked="checked"> Dhuhr</label>
+                    <label class="toggle-row focusable" tabindex="0"><input id="toggle-asr" type="checkbox" checked="checked"> Asr</label>
+                    <label class="toggle-row focusable" tabindex="0"><input id="toggle-maghrib" type="checkbox" checked="checked"> Maghrib</label>
+                    <label class="toggle-row focusable" tabindex="0"><input id="toggle-isha" type="checkbox" checked="checked"> Isha</label>
                 </fieldset>
                 <fieldset class="setting-fieldset">
                     <legend>Zeit-Offsets (Minuten)</legend>
-                    <label class="offset-row focusable" tabindex="0">Fajr <input id="offset-fajr" type="number" class="setting-input offset-input" value="0"></label>
-                    <label class="offset-row focusable" tabindex="0">Dhuhr <input id="offset-dhuhr" type="number" class="setting-input offset-input" value="0"></label>
-                    <label class="offset-row focusable" tabindex="0">Asr <input id="offset-asr" type="number" class="setting-input offset-input" value="0"></label>
-                    <label class="offset-row focusable" tabindex="0">Maghrib <input id="offset-maghrib" type="number" class="setting-input offset-input" value="0"></label>
-                    <label class="offset-row focusable" tabindex="0">Isha <input id="offset-isha" type="number" class="setting-input offset-input" value="0"></label>
+                    <label class="offset-row focusable" tabindex="0">Fajr <input id="offset-fajr" type="text" class="setting-input offset-input" value="0"></label>
+                    <label class="offset-row focusable" tabindex="0">Dhuhr <input id="offset-dhuhr" type="text" class="setting-input offset-input" value="0"></label>
+                    <label class="offset-row focusable" tabindex="0">Asr <input id="offset-asr" type="text" class="setting-input offset-input" value="0"></label>
+                    <label class="offset-row focusable" tabindex="0">Maghrib <input id="offset-maghrib" type="text" class="setting-input offset-input" value="0"></label>
+                    <label class="offset-row focusable" tabindex="0">Isha <input id="offset-isha" type="text" class="setting-input offset-input" value="0"></label>
                 </fieldset>
             </div>
-            <nav class="settings-nav">
-                <button id="btn-save-settings" class="nav-btn focusable" tabindex="0">Speichern &amp; neu planen</button>
-                <button id="btn-test-azan" class="nav-btn focusable" tabindex="0">Azan jetzt testen</button>
-                <button id="btn-back-main" class="nav-btn focusable" tabindex="0">Zurück</button>
-            </nav>
-        </main>
+            <div class="settings-nav">
+                <button id="btn-save-settings" class="nav-btn focusable" tabindex="0" type="button">Speichern &amp; neu planen</button>
+                <button id="btn-test-azan" class="nav-btn focusable" tabindex="0" type="button">Azan jetzt testen</button>
+                <button id="btn-back-main" class="nav-btn focusable" tabindex="0" type="button">Zurück</button>
+            </div>
+        </div>
 
-        <main id="screen-prayer" class="screen screen-prayer">
-            <p class="prayer-label">Gebetszeit</p>
-            <h2 id="prayer-name" class="prayer-name">—</h2>
-            <p id="prayer-time" class="prayer-time">--:--</p>
-            <p id="prayer-status" class="prayer-status">Azan wird vorbereitet…</p>
-        </main>
+        <div id="screen-prayer" class="screen screen-prayer">
+            <div id="prayer-backdrop" class="prayer-backdrop"></div>
+            <div class="prayer-content glass-panel">
+                <p class="prayer-label">Gebetszeit</p>
+                <h2 id="prayer-name" class="prayer-name">—</h2>
+                <p id="prayer-time" class="prayer-time">--:--</p>
+                <p id="prayer-status" class="prayer-status">Azan wird vorbereitet…</p>
+            </div>
+        </div>
     </div>
 
-    <script src="src/vendor/adhan.min.js"></script>
-    <script src="src/storageService.js"></script>
-    <script src="src/prayerTimeService.js"></script>
-    <script src="src/alarmService.js"></script>
-    <script src="src/audioService.js"></script>
-    <script src="src/tvPowerService.js"></script>
-    <script src="src/testModeService.js"></script>
-    <script src="src/ui/mainScreen.js"></script>
-    <script src="src/ui/settingsScreen.js"></script>
-    <script src="src/ui/prayerScreen.js"></script>
-    <script src="src/app.js"></script>
+    <script type="text/javascript" src="src/vendor/adhan.min.js"></script>
+    <script type="text/javascript" src="src/storageService.js"></script>
+    <script type="text/javascript" src="src/prayerTimeService.js"></script>
+    <script type="text/javascript" src="src/alarmService.js"></script>
+    <script type="text/javascript" src="src/audioService.js"></script>
+    <script type="text/javascript" src="src/tvPowerService.js"></script>
+    <script type="text/javascript" src="src/testModeService.js"></script>
+    <script type="text/javascript" src="src/remoteSettingsService.js"></script>
+    <script type="text/javascript" src="src/ui/backgroundTheme.js"></script>
+    <script type="text/javascript" src="src/ui/mainScreen.js"></script>
+    <script type="text/javascript" src="src/ui/settingsScreen.js"></script>
+    <script type="text/javascript" src="src/ui/prayerScreen.js"></script>
+    <script type="text/javascript" src="src/app.js"></script>
 </body>
 </html>
